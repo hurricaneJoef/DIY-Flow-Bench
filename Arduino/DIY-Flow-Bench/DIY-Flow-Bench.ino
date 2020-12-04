@@ -1084,7 +1084,7 @@ void parseAPI(byte serialData)
             streamMafDataAsCSV = true;
         break;
 
-        case 'S': // DEBUG NORMALY'
+        case 's': // DEBUG NORMALY'
             messageData = String("s") + API_DELIM;
             streamMafDataAsCSV = false;
         break;
