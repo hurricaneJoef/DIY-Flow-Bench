@@ -105,6 +105,7 @@
  ***/
 
 bool streamMafData = false;
+bool streamMafDataAsCSV = false;
 float startupBaroPressure;
 int errorVal = 0;
 bool benchIsRunning();
@@ -546,17 +547,34 @@ float getMafFlowCFM()
     mafFlowRateCFM = convertMassFlowToVolumetric(mafFlowRateKGH);// + calibrationOffset; // add calibration offset to value //TODO #21 Need to validate and test calibration routine
 
     if (streamMafData == true) {
-        sendSerial(String(mafMillivolts));
-        sendSerial("mv = ");
-        if (MAFdataUnit == KG_H) {
-            sendSerial(String(mafFlowRateRAW / 1000));
-            sendSerial("kg/h = ");
-        } else if (MAFdataUnit == MG_S) {
-            sendSerial(String(mafFlowRateRAW));
-            sendSerial("mg/s = ");
+        
+        if (streamMafDataAsCSV == true){
+            
+            sendSerial(String(mafMillivolts));
+            sendSerial(",");
+            if (MAFdataUnit == KG_H) {
+                sendSerial(String(mafFlowRateRAW / 1000));
+                sendSerial(",");
+            } else if (MAFdataUnit == MG_S) {
+                sendSerial(String(mafFlowRateRAW));
+                sendSerial(",");
+            }
+            sendSerial(String(mafFlowRateCFM ));
+            sendSerial(",\r\n");
+        }else{
+            
+            sendSerial(String(mafMillivolts));
+            sendSerial("mv = ");
+            if (MAFdataUnit == KG_H) {
+                sendSerial(String(mafFlowRateRAW / 1000));
+                sendSerial("kg/h = ");
+            } else if (MAFdataUnit == MG_S) {
+                sendSerial(String(mafFlowRateRAW));
+                sendSerial("mg/s = ");
+            }
+            sendSerial(String(mafFlowRateCFM ));
+            sendSerial("cfm \r\n");
         }
-        sendSerial(String(mafFlowRateCFM ));
-        sendSerial("cfm \r\n");
     }
 
     return mafFlowRateCFM;
@@ -1061,6 +1079,16 @@ void parseAPI(byte serialData)
         break;
 
         // We've got here without a valid API request so lets get outta here before we send garbage to the serial comms
+        case 'S': // DEBUG MAF AS CSV'
+            messageData = String("S") + API_DELIM ;
+            streamMafDataAsCSV = true;
+        break;
+
+        case 'S': // DEBUG NORMALY'
+            messageData = String("s") + API_DELIM;
+            streamMafDataAsCSV = false;
+        break;
+
         default:
             return;
         break;
